@@ -1,0 +1,28 @@
+body{
+	margin-top: -100px !important;
+	background-color: #E5E7E9 !important;
+	overflow-y: scroll;
+}
+.sign-up-block--flex.sign-up-block--center{
+	background-color: #323232 !important;
+}
+header,
+iframe.brending-creative,
+div#app,
+div.top-ad,
+div.place-for-ad,
+div.in-read-wrapper,
+div.adfox-banner,
+.c-tag-header__mobile-apps,
+.tag-head-dropdown.c-dropdown.js-active,
+.section.section-social,
+footer
+{
+	display: none !important;
+}
+.headerLayout{
+	background-color: #E5E7E9 !important;;
+}
+.box_height_200{
+	height: 200px !important;
+}

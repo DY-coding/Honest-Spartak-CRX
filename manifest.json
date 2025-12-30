@@ -1,0 +1,43 @@
+{
+	"manifest_version": 3,
+	"name": "Honest Spartak",
+	"version": "1.0",
+	"content_scripts": [
+		{
+		"matches": ["https://www.sports.ru/football/club/spartak/"],
+		"css": ["early.css"],
+		"run_at": "document_start"
+		},
+		{
+		"matches": ["https://www.sports.ru/football/club/spartak/"],
+		"js": ["content.js"],
+		"type": "module",
+		"css": ["styles.css"],
+		"run_at": "document_end"
+		}
+	],
+	"permissions": [
+		"tabs",
+		"storage",
+		"alarms"
+	],
+	"background":{
+		"service_worker": "background.js",
+		"type": "module"
+	},
+	"action":{
+		"default_title": "Честный Спартак",
+		"default_popup": "",
+		"default_icon": {
+			"16": "images/honest_spartak_16.png",
+			"32": "images/honest_spartak_32.png"
+		}
+	},
+	"icons":{
+		"16": "images/honest_spartak_16.png",
+		"32": "images/honest_spartak_32.png",
+		"48": "images/honest_spartak_48.png",
+		"128": "images/honest_spartak_128.png"
+
+	}
+}
