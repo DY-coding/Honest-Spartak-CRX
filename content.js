@@ -241,7 +241,6 @@ const antiAdblockObserver = new MutationObserver( records => {
 				const cls = node.className;
 				if(cls.length === 33 || cls.length === 67 ){
 					node.classList.add('hidden');
-					console.warn("BLOCK");
 				}
 				// учет wrapper-а
 				const child = node.firstElementChild;
@@ -250,7 +249,6 @@ const antiAdblockObserver = new MutationObserver( records => {
 					const cls = child.className;
 					if(cls.length === 33 || cls.length === 67 ){
 						node.classList.add('hidden');
-						console.warn("BLOCK");
 					}
 				}
 			}
@@ -471,9 +469,6 @@ function reFormat(str){
 	return previewBox; // ссылка на окно новости
 }
 
-	
-
-
 
  // функция обновления блока информации 
  function updateInfo(true_news_total, news_total){
@@ -492,7 +487,6 @@ function reFormat(str){
 
 
 //////////// УСТАНОВКА ОБСЕРВЕРОВ МУТАЦИЙ ////////////////////
-
 // удаление нижнего меню, появляющегося динамически при изменении размеров окна браузера
 const observer1 = new MutationObserver(records => {
 //	console.log(`::=== Количество объектов MutationRecord ${records.length} ===`);
