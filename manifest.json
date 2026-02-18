@@ -11,13 +11,15 @@
 		{
 		"matches": ["https://www.sports.ru/football/club/spartak/"],
 		"js": ["content.js"],
-		"type": "module",
 		"css": ["styles.css"],
 		"run_at": "document_end"
 		}
 	],
+	"options_ui":{
+		"page": "options.html",
+		"open_in_tab" : true
+	},
 	"permissions": [
-		"tabs",
 		"storage",
 		"alarms"
 	],
@@ -35,9 +37,8 @@
 	},
 	"icons":{
 		"16": "images/honest_spartak_16.png",
-		"32": "images/honest_spartak_32.png",
+			"32": "images/honest_spartak_32.png",
 		"48": "images/honest_spartak_48.png",
 		"128": "images/honest_spartak_128.png"
-
 	}
 }

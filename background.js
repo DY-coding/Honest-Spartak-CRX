@@ -1,6 +1,21 @@
-import { blackUrls, blackListRaw } from './constants.js';
-const blackList = blackListRaw.map(item => item.toUpperCase());
 let timeoutId = null;
+let Enabled;
+let blackList = [];
+let blackUrls = [];
+
+// черный список
+const dataReady =  (async () => {
+	const syncData = await chrome.storage.sync.get(['Enabled', 'blackWords']);
+	Enabled = syncData.Enabled ?? true;
+	if(syncData.Enabled === undefined){
+			chrome.storage.sync.set({Enabled : true});
+	}
+	blackUrls = Enabled ? ["sirena.world", "t.me/sirena", "blogs", "cyber.sports", "anketolog", 
+							"/betting/", "/predictions/", "video.sports.ru", "specials"] : [];
+	blackList = Enabled ? (syncData.blackWords || []) : [];
+})();
+
+
 
 chrome.action.setBadgeBackgroundColor({ color: '#F08080' });
 
@@ -30,25 +45,42 @@ chrome.runtime.onStartup.addListener(async ()=> {
 });
 
 
+// реакция на изменение черного списка
+chrome.storage.onChanged.addListener((changes, area) =>{
+	if(area === 'sync'){
+		if(changes.Enabled)
+			Enabled = changes.Enabled.newValue;
+		if(changes.blackWords)
+			blackList = changes.blackWords.newValue;
+	}
+});
 
 chrome.action.onClicked.addListener(() => {
-	chrome.tabs.query({active:true, currentWindow:true}, tabs => {
-		chrome.tabs.update(tabs[0].id, { url: "https://www.sports.ru/football/club/spartak/"});
+	chrome.tabs.create({
+		url: "https://www.sports.ru/football/club/spartak/",
+		active: true
+
 	});
 });
 
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+
+chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
 	switch (request.action) {
-		// отправка по запросу контент-скрипта черного списка, т.к. import в контент-скрипте не работает
-		case 'getBlackLists':
-				sendResponse({blackUrls, blackList});
-				break;
 		case 'setBadgeText':
 				chrome.action.setBadgeText({text: request.value});
 				break;
 		case 'setTooltip':
-				chrome.action.setTitle({title: request.value});			
+				let newTooltip = "", oldTooltip = "";
+				const [tab] = await chrome.tabs.query({active: true, currentWindow: true});
+				if(tab){
+					oldTooltip = await chrome.action.getTitle({tabId: tab.id}) || "";
+				}
+				const matching = oldTooltip.match(/(◆.*◆)/s);
+				if(matching){
+					newTooltip = matching[0];
+				}
+				chrome.action.setTitle({title: newTooltip || request.value});			
 				break;
 	}
 	return true;
@@ -64,41 +96,93 @@ chrome.alarms.onAlarm.addListener(async alarm => {
 
 async function checkUnread() {
 
+	if(Enabled) await dataReady;
+
 	const result = await chrome.storage.local.get('keyReads');
 	const reads = Array.isArray(result.keyReads) ? result.keyReads : [];
 	
+	console.log("====")
+	console.log('Считано из локального хранилища (прочитанное):');
 	console.log(reads);
+	console.log("====")
+
+
 
 	try {
 		const response = await fetch('https://www.sports.ru/football/club/spartak/');
 		if(!response.ok) throw new Error(`Ошибка HTTP: ${response.status}`);
 	
 		const text = await response.text();
+		
+
+		let nextMatch = '';
+		const start = text.indexOf(`<div class="score score-gray">`);
+		if(start !== -1){
+
+			const chunk = text.substring(start, start + 1500);
+			const regex = new RegExp(
+				`itemprop="name">` + 
+				`\\s*(?<home>[^<]+?)\\s*</span>` +
+				`.*?itemprop="name">` +
+				`\\s*(?<away>[^<]+?)\\s*</span>` +
+				`.*?</div>`+
+				`\\s*(?<time>[^<]+?)\\s*<a` + 
+				`.*?">` + 
+				`\\s*(?<type>[^<]+?)\\s*</a>`,
+				`s`
+			);
+			const match = chunk.match(regex);
+
+			const targetDate = match.groups.time.match(/\d+ \S+/);
+			const now = new Date();
+			const tomorrow = new Date(now);
+			tomorrow.setDate(now.getDate()+1);
+			const afterTomorrow = new Date(now);
+			afterTomorrow.setDate(now.getDate()+2);
+
+			if (targetDate[0] === tomorrow.toLocaleDateString('ru-RU', {day: 'numeric', month: 'long'}))
+					nextMatch = `◆ ЗАВТРА `;
+			else if (targetDate[0] === afterTomorrow.toLocaleDateString('ru-RU', {day: 'numeric', month: 'long'}))
+					nextMatch = `◆ ПОСЛЕЗАВТРА `;
+			else if (targetDate[0] === now.toLocaleDateString('ru-RU', {day: 'numeric', month: 'long'}))				
+					nextMatch = '◆ СЕГОДНЯ ';
+			nextMatch += `◆ ${match.groups.time} ◆ ${match.groups.home} - ${match.groups.away} (${match.groups.type}) ◆\n\n`;
+		}
+
+
+		let cut;
 		const startIndex = text.indexOf('<div class="newsline">');
 		const endIndex = text.indexOf('<a href="#">Показать еще</a>', startIndex);
-		let cut;
 		if(startIndex !==-1 && endIndex !==-1)	cut = text.substring(startIndex, endIndex);
 		else 	cut = text;
-		console.log(cut);
 		if (cut.length) console.log(`Урезка в ${text.length/cut.length} раз.`);
 	
-		const matchResult = cut.matchAll(/<p><span class="date">(?<time>[^<]+)<\/span>&nbsp;<a class="short-text" href="(?<url>[^"]*?(?<id>\d+)[^"]*?\.html)">(?<text>[^<]+)<\/a/gi);
+		const matchResult = Array.from(cut.matchAll(/<p><span class="date">(?<time>[^<]+)<\/span>&nbsp;<a class="short-text" href="(?<url>[^"]*?(?<id>\d+)[^"]*?\.html)">(?<text>[^<]+)<\/a/gi));
+		
+		console.log('Считано из сети(с новыми:)');
+		const readed = [];
+		matchResult.forEach(item => readed.push(item[4]));
+		console.log({readed});
+		
+
 		let countUnread = 0;
-		let info = '';
+		let info = nextMatch;
 		let allTrueNews = 0;
 		for(const match of matchResult){
 
 			// замена обозначения тире на самое тире
 			const textCorrected = match.groups.text.replace(/&ndash;/g, "–");
 	
-	 		if( blackUrls.some(black => match.groups.url.includes(black)) ) continue;
-	 		if( blackList.some(black => textCorrected.toUpperCase().includes(black)) ) continue;
+	 		if(Enabled){
+	 			if( blackUrls.some(black => match.groups.url.includes(black)) ) continue;
+	 			if( blackList.some(black => textCorrected.toUpperCase().includes(black.toUpperCase())) ) continue;
+	 		}
 			++allTrueNews;
 		
 			if(reads.some(item => textCorrected === item)) continue;
 
 	 		++countUnread;
-		 	info += (match.groups.time + '.' + textCorrected.slice(0,90) + "…" + '\n');
+		 	info += (match.groups.time + ' ' + textCorrected.slice(0,90) + "…" + '\n');
 		}
 
 		console.log('Непрочитанных новостей: '+ countUnread + ' штук.');

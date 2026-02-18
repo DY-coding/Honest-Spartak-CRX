@@ -1,0 +1,188 @@
+body{
+	user-select: none;
+}
+.faded #title,
+.faded #header,
+.faded #container{
+	opacity: 0.2;
+}
+#title-block{
+	color: darkred;
+	text-align: center;
+	font-size: 24px;
+	font-weight: bolder;
+}
+#switch{
+	position: relative;
+	display: inline-block;
+	width: 50px;
+	vertical-align: center;
+}
+#switch input{
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+.slider{
+	position: absolute;
+	cursor: pointer;
+	background-color: whitesmoke;
+	border-radius: 20px;
+	border: 1px solid lightgrey;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+}
+.knob{
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: absolute;
+	background-color: indianred;
+	height: 30px;
+	width: 30px;
+	left: 0;
+	bottom: 0;
+	border-radius: 50%;
+	font-size: 75%;
+	color: whitesmoke;
+	font-family: Verdana;
+	font-weight: 500;
+}
+input:checked + .slider .knob{
+	left: 100%;
+	transform: translateX(-100%);
+}
+input:checked + .slider{
+	background-color: lightpink;	
+}
+.faded #inputField{
+	user-select: none;
+	pointer-events: none;
+}
+body:not(.faded) .wrapper:hover .blackWord{
+	color: white;
+	background-color: firebrick;
+}
+.buttonHeader:hover:not(:disabled){
+	color: white;
+	background-color: green;
+	transform: scale(1.1);
+}
+button{
+	font-family: Verdana;
+	border-radius: 24px;
+	border: 1px solid;
+}
+#header{
+	display: flex;
+	justify-content: space-between;
+	padding: 0px 45px 20px 5px;
+}
+#header > div{
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+.buttonHeader{
+	color: green;
+	background-color: white;
+	padding: 8px;
+	border: 2px solid;
+}
+#inputContainer:has(input:placeholder-shown) #addButton{
+	color: lightgrey;
+	pointer-events: none;
+}
+input{
+	border-radius: 10px;
+	height: 28px;
+	border: 1px solid;
+	font-family: Verdana;
+	font-size: larger;
+	padding:  0 10px;
+}
+input:focus{
+	outline: none;
+}
+#container{
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-evenly;
+}
+.wrapper{
+	display: inline-flex;
+	position: relative;
+	vertical-align: middle;
+    align-items: center;
+}
+.blackWord{
+	border: 1px solid firebrick;
+	color: firebrick;
+	border-radius: 10px;
+	margin: 4px 10px;
+	padding: 4px;
+}
+.buttonX{
+	height: 20px;	
+	width: 20px;
+	display: none;
+	position: absolute;
+	top: 0px;
+	right: 4px;
+	border: 1px solid red;
+	font-weight: bolder;
+	color: red;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+.buttonX:hover{
+	background-color: red;
+	color: white;
+	transform: scale(1.5);
+}
+body:not(.faded) .wrapper:hover .buttonX{
+	display: flex;
+}
+.inactive{
+	color: lightgrey;
+	pointer-events: none;	
+}
+@keyframes shake{
+	0%, 100% {transform: scale(2) rotate(0deg); }
+	15%, 45%, 75% {transform: scale(2) rotate(-5deg);}
+	30%, 60%, 90% {transform: scale(2) rotate(5deg);}
+}
+.shake{
+	animation: shake 0.6s ease-in-out;
+	background-color: firebrick;
+	color: white;
+}
+@keyframes fadeOut{
+	0% {background-color: lightpink;}
+	100% {background-color: white;}
+}
+.empty{
+	animation: fadeOut 0.6s ease-out;
+}
+@keyframes popup{
+	0% 	 { transform: scale(0.1); opacity: 0;}
+	70%  { transform: scale(1.7); opacity: 0.7;}
+	100% { transform: scale(1.0); opacity: 1;}
+}
+.new{
+	animation: popup 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+@keyframes disappear{
+	0% {opacity: 1;}
+	100% {opacity: 0;}
+}
+.delete{
+	animation: disappear 1.0s ease-out forwards;
+	pointer-events: none;
+}
+.hidden{
+	display: none !important;
+}
