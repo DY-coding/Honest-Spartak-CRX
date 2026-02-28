@@ -126,7 +126,7 @@ async function checkUnread() {
 				`.*?itemprop="name">` +
 				`\\s*(?<away>[^<]+?)\\s*</span>` +
 				`.*?</div>`+
-				`\\s*(?<time>[^<]+?)\\s*<a` + 
+				`\\s*0*(?<time>[^<]+?)\\s*<a` + 
 				`.*?">` + 
 				`\\s*(?<type>[^<]+?)\\s*</a>`,
 				`s`
@@ -139,6 +139,7 @@ async function checkUnread() {
 			tomorrow.setDate(now.getDate()+1);
 			const afterTomorrow = new Date(now);
 			afterTomorrow.setDate(now.getDate()+2);
+
 
 			if (targetDate[0] === tomorrow.toLocaleDateString('ru-RU', {day: 'numeric', month: 'long'}))
 					nextMatch = `◆ ЗАВТРА `;
