@@ -135,18 +135,29 @@ async function checkUnread() {
 
 			const targetDate = match.groups.time.match(/\d+ \S+/);
 			const now = new Date();
-			const tomorrow = new Date(now);
-			tomorrow.setDate(now.getDate()+1);
-			const afterTomorrow = new Date(now);
-			afterTomorrow.setDate(now.getDate()+2);
+			
+			let j = 0;
+			while(1){
+				const day = new Date(now);
+				day.setDate(now.getDate() + j);
 
+				if(targetDate[0] === day.toLocaleDateString('ru-RU', {day: 'numeric', month: 'long'})) {
+					switch(j) {
+						case 0: nextMatch = '◆ СЕГОДНЯ ';
+								break;
+						case 1: nextMatch = `◆ ЗАВТРА `;
+								break;
+						case 2: nextMatch = `◆ ПОСЛЕЗАВТРА `; 
+								break;
+						default:
+								nextMatch = `◆ ${day.toLocaleDateString('ru-RU', {weekday: 'long'}).toUpperCase()} `;
+								break;
+					}
+					break;
+				}
+				if(j++>400) break;
+			}
 
-			if (targetDate[0] === tomorrow.toLocaleDateString('ru-RU', {day: 'numeric', month: 'long'}))
-					nextMatch = `◆ ЗАВТРА `;
-			else if (targetDate[0] === afterTomorrow.toLocaleDateString('ru-RU', {day: 'numeric', month: 'long'}))
-					nextMatch = `◆ ПОСЛЕЗАВТРА `;
-			else if (targetDate[0] === now.toLocaleDateString('ru-RU', {day: 'numeric', month: 'long'}))				
-					nextMatch = '◆ СЕГОДНЯ ';
 			nextMatch += `◆ ${match.groups.time} ◆ ${match.groups.home} - ${match.groups.away} (${match.groups.type}) ◆\n\n`;
 		}
 
